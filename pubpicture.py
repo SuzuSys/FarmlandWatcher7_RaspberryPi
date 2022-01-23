@@ -31,6 +31,9 @@ def checkInternetHttplib(url, timeout=3):
 def picture_is_nothing(url):
   return os.listdir(url) == []
 
+def pictures_list(url):
+  return os.listdir(url)
+
 if __name__ == '__main__':
   print(f"loading parameters from {PARAMSFILE}")
   with open(PARAMSFILE, 'r') as f:
@@ -78,7 +81,7 @@ if __name__ == '__main__':
         message = {
           "dimension": params['dimension'],
           "topic": subscribe_topic,
-          "filenames": ["aa.jpg", "bb.jpg"]
+          "filenames": pictures_list(url=params['picture-folder'])
         }
         print("Publishing message to topic '{}': {}".format(request_topic, json.dumps(message)))
         mqtt_connection.publish(
