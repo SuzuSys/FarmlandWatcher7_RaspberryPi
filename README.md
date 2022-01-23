@@ -21,7 +21,7 @@ Reference: https://github.com/aws/aws-iot-device-sdk-python-v2.git
 ```
 {
   "endpoint": "XXX.iot.XXX.amazonaws.com",
-  "topic": "XXX",
+  "sensor_topic": "XXX",
   "root-ca": "XXX.pem",
   "cert": "XXX.pem.crt",
   "key": "XXX.pem.key",

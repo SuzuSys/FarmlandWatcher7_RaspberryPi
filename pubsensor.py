@@ -8,11 +8,11 @@ import json, csv, time, http.client
 
 PARAMSFILE = 'params.json'
 
-# IoT Core 接続エラー時のコールバック
+# MQTT Callback
 def on_connection_interrupted(connection, error, **kwargs):
   print("Connection interrupted. error: {}".format(error))
 
-# IoT Core 再接続時のコールバック
+# MQTT Callback
 def on_connection_resumed(connection, return_code, session_present, **kwargs):
   print("Connection resumed. return_code: {} session_present: {}".format(return_code, session_present))
 
@@ -22,8 +22,7 @@ def checkInternetHttplib(url, timeout=3):
     conn.request("HEAD", "/")
     conn.close()
     return True
-  except Exception as e:
-    print(e)
+  except Exception:
     return False
 
 def data_is_nothing(url):
@@ -69,7 +68,7 @@ if __name__ == '__main__':
     try:
       if data_is_nothing(url=params['datafile']):
         print("data is nothing")
-        time.sleep(60*60)
+        time.sleep(params['sensor_once_every_hour']*3600)
       elif not checkInternetHttplib(url=params['connect-confirm-url']):
         print("wifi is nothing")
         time.sleep(5)
@@ -78,12 +77,12 @@ if __name__ == '__main__':
         print("Connecting to {} with client ID '{}'...".format(
           params['endpoint'], params['client-id']))
 
+        # Connect
         connect_future = mqtt_connection.connect()
-        # 接続を待機する
         connect_future.result()
         print("Connected!")
 
-        # IoT Core へのtopicへpublishする
+        # Publish
         while True:
           if data_is_nothing(url=params['datafile']):
             print("finished sending all data.")
@@ -104,9 +103,9 @@ if __name__ == '__main__':
             dictdata.append(params['dimension'])
             message = dict(zip(dictkey, dictdata))
             print("Publishing messgeto topic '{}': {}".format(
-              params['topic'], json.dumps(message)))
+              params['sensor_topic'], json.dumps(message)))
             mqtt_connection.publish(
-              topic=params['topic'],
+              topic=params['sensor_topic'],
               payload=json.dumps(message),
               qos=mqtt.QoS.AT_LEAST_ONCE)
             time.sleep(1)
