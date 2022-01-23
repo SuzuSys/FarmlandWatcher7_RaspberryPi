@@ -56,7 +56,6 @@ def write_csv(url):
 
 if __name__ == '__main__':
   print(f"loading parameters from {PARAMSFILE}")
-  params = None
   with open(PARAMSFILE, 'r') as f:
     params = json.load(f)
     params['client-id'] = str(uuid4())
