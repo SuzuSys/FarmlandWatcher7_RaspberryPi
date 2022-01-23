@@ -1,7 +1,6 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0.
 
-import argparse
 from awscrt import io, mqtt, auth, http
 from awsiot import mqtt_connection_builder
 import sys
@@ -9,39 +8,15 @@ import threading
 import time
 from uuid import uuid4
 import json
-
 import datetime
+import csv
 
-# IoT Core 用の引数
-parser = argparse.ArgumentParser(description="Send and receive messages through and MQTT connection.")
-parser.add_argument('--endpoint', required=True, help="Your AWS IoT custom endpoint, not including a port. " +
-                                                      "Ex: \"abcd123456wxyz-ats.iot.us-east-1.amazonaws.com\"")
-parser.add_argument('--port', type=int, help="Specify port. AWS IoT supports 443 and 8883.")
-parser.add_argument('--cert', help="File path to your client certificate, in PEM format.")
-parser.add_argument('--key', help="File path to your private key, in PEM format.")
-parser.add_argument('--root-ca', help="File path to root certificate authority, in PEM format. " +
-                                      "Necessary if MQTT server uses a certificate that's not already in " +
-                                      "your trust store.")
-parser.add_argument('--client-id', default="test-" + str(uuid4()), help="Client ID for MQTT connection.")
-parser.add_argument('--topic', default="test/topic", help="Topic to subscribe to, and publish messages to.")
-parser.add_argument('--message', default="Hello World!", help="Message to publish. " +
-                                                              "Specify empty string to publish nothing.")
-# parser.add_argument('--count', default=10, type=int, help="Number of messages to publish/receive before exiting. " +
-#                                                          "Specify 0 to run forever.")
-parser.add_argument('--use-websocket', default=False, action='store_true',
-  help="To use a websocket instead of raw mqtt. If you " +
-  "specify this option you must specify a region for signing.")
-parser.add_argument('--signing-region', default='us-east-1', help="If you specify --use-web-socket, this " +
-  "is the region that will be used for computing the Sigv4 signature")
-parser.add_argument('--proxy-host', help="Hostname of proxy to connect to.")
-parser.add_argument('--proxy-port', type=int, default=8080, help="Port of proxy to connect to.")
-parser.add_argument('--verbosity', choices=[x.name for x in io.LogLevel], default=io.LogLevel.NoLogs.name,
-  help='Logging level')
+try:
+  import httplib
+except:
+  import http.client as httplib
 
-# 引数を集約
-args = parser.parse_args()
-
-io.init_logging(getattr(io.LogLevel, args.verbosity), 'stderr')
+PARAMSFILE = 'params.json'
 
 # IoT Core 接続エラー時のコールバック
 def on_connection_interrupted(connection, error, **kwargs):
@@ -51,46 +26,106 @@ def on_connection_interrupted(connection, error, **kwargs):
 def on_connection_resumed(connection, return_code, session_present, **kwargs):
   print("Connection resumed. return_code: {} session_present: {}".format(return_code, session_present))
 
+def checkInternetHttplib(url, timeout=3):
+  conn = httplib.HTTPConnection(url, timeout=timeout)
+  try:
+    conn.request("HEAD", "/")
+    conn.close()
+    return True
+  except Exception as e:
+    return False
+
+def data_is_nothing(url):
+  with open(url, 'r') as f:
+    csvreader = csv.reader(f)
+    next(csvreader)
+    row = next(csvreader, 0)
+    if row == 0:
+      return True
+    else:
+      return False
+
+def write_csv(url):
+  with open(url, "r") as fr:
+    lines = fr.readlines()
+    data = lines[1].strip().split(',')
+    lines[1:2] = []
+    with open(url, 'w') as fw:
+      fw.writelines(lines)
+      return data
+
 if __name__ == '__main__':
-  # IoT Core 接続
+  print(f"loading parameters from {PARAMSFILE}")
+  params = None
+  with open(PARAMSFILE, 'r') as f:
+    params = json.load(f)
+    params['client-id'] = str(uuid4())
+
+  print("setting connection...")
   event_loop_group = io.EventLoopGroup(1)
   host_resolver = io.DefaultHostResolver(event_loop_group)
   client_bootstrap = io.ClientBootstrap(event_loop_group, host_resolver)
 
   mqtt_connection = mqtt_connection_builder.mtls_from_path(
-    endpoint=args.endpoint,
-    cert_filepath=args.cert,
-    pri_key_filepath=args.key,
+    endpoint=params['endpoint'],
+    cert_filepath=params['cert'],
+    pri_key_filepath=params['key'],
     client_bootstrap=client_bootstrap,
-    ca_filepath=args.root_ca,
+    ca_filepath=params['root-ca'],
     on_connection_interrupted=on_connection_interrupted,
     on_connection_resumed=on_connection_resumed,
-    client_id=args.client_id,
+    client_id=params['client-id'],
     clean_session=False,
     keep_alive_secs=6)
 
-  print("Connecting to {} with client ID '{}'...".format(
-    args.endpoint, args.client_id))
+  while True:
+    try:
+      if data_is_nothing(url=params['datafile']):
+        print("data is nothing")
+        time.sleep(60*60)
+      elif not checkInternetHttplib(url=params['connect-confirm-url']):
+        print("wifi is nothing")
+        time.sleep(5)
+      else:
+        print("trying to send data to cloud...")
+        print("Connecting to {} with client ID '{}'...".format(
+          params['endpoint'], params['client-id']))
 
-  connect_future = mqtt_connection.connect()
+        connect_future = mqtt_connection.connect()
+        # 接続を待機する
+        connect_future.result()
+        print("Connected!")
 
-  # 接続を待機する
-  connect_future.result()
-  print("Connected!")
-
-  # IoT Core へのトピックへpublishする
-  dt_now_jst = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
-  dt_jst = dt_now_jst.strftime('%Y-%m-%d %H:%M:%S %Z')
-  message = {"temp": 11.1, "humidity": 21.2, "datetime_jst": dt_jst}
-  print("Publishing messgeto topic '{}': {}".format(args.topic, json.dumps(message)))
-  mqtt_connection.publish(
-    topic=args.topic,
-    payload=json.dumps(message),
-    qos=mqtt.QoS.AT_LEAST_ONCE)
-  time.sleep(1)
-
-  # 切断
-  print("Disconnecting...")
-  disconnect_future = mqtt_connection.disconnect()
-  disconnect_future.result()
-  print("Disconnected!")
+        # IoT Core へのtopicへpublishする
+        while True:
+          if data_is_nothing(url=params['datafile']):
+            print("finished sending all data.")
+            print("Disconnecting...")
+            disconnect_future = mqtt_connection.disconnect()
+            disconnect_future.result()
+            print("Disconnected!")
+            time.sleep(60)
+            break
+          elif not checkInternetHttplib(url=params['connect-confirm-url']):
+            print("wifi is nothing.")
+            break
+          else:
+            print("send data to cloud.")
+            dictkey = ["temp", "humidity", "waterlevel", "datetime", "dimension"]
+            dictdata = write_csv(url=params['datafile'])
+            dictdata[0:3] = map(float, dictdata[0:3])
+            dictdata.append(params['dimension'])
+            message = dict(zip(dictkey, dictdata))
+            print("Publishing messgeto topic '{}': {}".format(
+              params['topic'], json.dumps(message)))
+            mqtt_connection.publish(
+              topic=params['topic'],
+              payload=json.dumps(message),
+              qos=mqtt.QoS.AT_LEAST_ONCE)
+            time.sleep(1)
+        time.sleep(1)
+    except KeyboardInterrupt:
+      print("KeyboardInterrupt.")
+      break
+    except Exception as e:
+      print(e)

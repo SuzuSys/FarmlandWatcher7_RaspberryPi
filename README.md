@@ -3,6 +3,7 @@
 ## Installed for cc.py
 + gpiozero (pip)
 + Adafruit_DHT (pip)
++ Schedule (pip)
 
 ## Installation for pubsub.py
 ```
