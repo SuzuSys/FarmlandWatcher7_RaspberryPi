@@ -72,9 +72,23 @@ if __name__ == '__main__':
         connect_future.result()
         print("Connected!")
 
-        # Subscribe
+        # Publish
         request_topic = params['prefix_topic'] + '/' + params['request_topic']
-        print(f"Subscribing topic '{request_topic}'")
+        subscribe_topic = params['prefix_topic'] + '/' + str(uuid4)
+        message = {
+          "dimension": params['dimension'],
+          "topic": subscribe_topic,
+          "filenames": ["aa.jpg", "bb.jpg"]
+        }
+        print("Publishing message to topic '{}': {}".format(request_topic, json.dumps(message)))
+        mqtt_connection.publish(
+          topic=request_topic,
+          payload=json.dumps(message),
+          qos=mqtt.QoS.AT_LEAST_ONCE)
+        time.sleep(3600)
+        
+        # Subscribe
+        print(f"Subscribing topic '{subscribe_topic}'")
         subscribe_future, packet_id = mqtt_connection.subscribe(
           topic=request_topic,
           qos=mqtt.QoS.AT_LEAST_ONCE,
