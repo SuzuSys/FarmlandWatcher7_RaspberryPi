@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
         # Publish
         request_topic = params['prefix_topic'] + '/' + params['request_topic']
-        subscribe_topic = params['prefix_topic'] + '/' + str(uuid4)
+        subscribe_topic = params['prefix_topic'] + '/' + str(uuid4())
         message = {
           "dimension": params['dimension'],
           "topic": subscribe_topic,
