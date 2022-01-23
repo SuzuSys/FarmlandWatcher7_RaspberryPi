@@ -75,6 +75,15 @@ if __name__ == '__main__':
         connect_future.result()
         print("Connected!")
 
+        # Subscribe
+        print(f"Subscribing topic '{subscribe_topic}'")
+        subscribe_future, packet_id = mqtt_connection.subscribe(
+          topic=request_topic,
+          qos=mqtt.QoS.AT_LEAST_ONCE,
+          callback=on_message_received)
+        subscribe_result = subscribe_future.result()
+        print("Subscribed with {}".format(str(subscribe_result['qos'])))
+
         # Publish
         request_topic = params['prefix_topic'] + '/' + params['request_topic']
         subscribe_topic = params['prefix_topic'] + '/' + str(uuid4())
@@ -89,17 +98,6 @@ if __name__ == '__main__':
           payload=json.dumps(message),
           qos=mqtt.QoS.AT_LEAST_ONCE)
         time.sleep(3600)
-        
-        # Subscribe
-        print(f"Subscribing topic '{subscribe_topic}'")
-        subscribe_future, packet_id = mqtt_connection.subscribe(
-          topic=request_topic,
-          qos=mqtt.QoS.AT_LEAST_ONCE,
-          callback=on_message_received)
-
-        subscribe_result = subscribe_future.result()
-        print("Subscribed with {}".format(str(subscribe_result['qos'])))
-        time.sleep(60*60)
     except KeyboardInterrupt:
       print("KeyboardInterrupt.")
       break
