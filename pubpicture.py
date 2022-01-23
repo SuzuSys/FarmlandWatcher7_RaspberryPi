@@ -82,7 +82,7 @@ if __name__ == '__main__':
         # Subscribe
         print(f"Subscribing topic '{subscribe_topic}'")
         subscribe_future, packet_id = mqtt_connection.subscribe(
-          topic=request_topic,
+          topic=subscribe_topic,
           qos=mqtt.QoS.AT_LEAST_ONCE,
           callback=on_message_received)
         subscribe_result = subscribe_future.result()
