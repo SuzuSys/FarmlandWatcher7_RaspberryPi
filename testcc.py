@@ -14,7 +14,7 @@ Vref = 3.3
 timeC = ''
 
 
-def sensor(csv):
+def sensor(datafile):
   sen0193 = MCP3002(channel=0)
   hum = round(sen0193.value * Vref * 100,2)
   print("WaterLevel = ", str(hum))
@@ -31,7 +31,7 @@ def sensor(csv):
   timeC = timeA.strftime('%Y-%m-%d %H:%M:%S')
   data = [temperature, humidity, hum, timeC]
       
-  with open(csv,"a") as output:
+  with open(datafile,"a") as output:
     writer = csv.writer(output, delimiter=",", lineterminator="\n")
     writer.writerow(data)
 
@@ -53,7 +53,7 @@ if __name__ == '__main__':
   with open(PARAMSFILE, 'r') as f:
     params = json.load(f)
   try:
-    sensor(csv=params["datafile"])
+    sensor(datafile=params["datafile"])
     camera(dir=params["picture-folder"])
   except KeyboardInterrupt:
     print('KeyboardInterrupt.')
