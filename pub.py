@@ -29,17 +29,17 @@ def checkInternetHttplib(url, timeout=3):
 def data_is_nothing(url):
   with open(url, 'r') as f:
     csvreader = csv.reader(f)
-  next(csvreader)
-  row = next(csvreader, 0)
-  return row == 0
+    next(csvreader)
+    row = next(csvreader, 0)
+    return row == 0
 
 def write_csv(url):
   with open(url, "r") as fr:
     lines = fr.readlines()
-  data = lines[1].strip().split(',')
-  lines[1:2] = []
-  with open(url, 'w') as fw:
-    fw.writelines(lines)
+    data = lines[1].strip().split(',')
+    lines[1:2] = []
+    with open(url, 'w') as fw:
+      fw.writelines(lines)
   return data
 
 if __name__ == '__main__':
