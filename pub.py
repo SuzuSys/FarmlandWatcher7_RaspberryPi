@@ -4,7 +4,7 @@
 from awscrt import io, mqtt
 from awsiot import mqtt_connection_builder
 from uuid import uuid4
-import json, csv, time, http
+import json, csv, time, http.client
 
 PARAMSFILE = 'params.json'
 
@@ -116,3 +116,4 @@ if __name__ == '__main__':
       break
     except Exception as e:
       print(e)
+      break
