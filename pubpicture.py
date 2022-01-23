@@ -73,9 +73,10 @@ if __name__ == '__main__':
         print("Connected!")
 
         # Subscribe
-        print("subscribe to topic")
+        request_topic = params['prefix_topic'] + '/' + params['request_topic']
+        print(f"Subscribing topic '{request_topic}'")
         subscribe_future, packet_id = mqtt_connection.subscribe(
-          topic="iot/topic/requesttest",
+          topic=request_topic,
           qos=mqtt.QoS.AT_LEAST_ONCE,
           callback=on_message_received)
 

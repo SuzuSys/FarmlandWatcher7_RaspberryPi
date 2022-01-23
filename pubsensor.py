@@ -102,10 +102,10 @@ if __name__ == '__main__':
             dictdata[0:3] = map(float, dictdata[0:3])
             dictdata.append(params['dimension'])
             message = dict(zip(dictkey, dictdata))
-            print("Publishing messgeto topic '{}': {}".format(
-              params['sensor_topic'], json.dumps(message)))
+            sensor_topic = params['prefix_topic'] + '/' + params['sensor_topic']
+            print("Publishing message to topic '{}': {}".format(sensor_topic, json.dumps(message)))
             mqtt_connection.publish(
-              topic=params['sensor_topic'],
+              topic=sensor_topic,
               payload=json.dumps(message),
               qos=mqtt.QoS.AT_LEAST_ONCE)
             time.sleep(1)
