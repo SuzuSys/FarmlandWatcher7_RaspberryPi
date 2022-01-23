@@ -6,15 +6,14 @@ from gpiozero import MCP3002
 import Adafruit_DHT
 import csv
 import json
+import warnings
 
-csvfile = "temp.csv"
-Vref = 3.3
-timeC = ''
-
+warnings.filters("gpiozero.SPISoftwareFallback")
+VREF = 3.3
 
 def sensor(datafile):
   sen0193 = MCP3002(channel=0)
-  hum = round(sen0193.value * Vref * 100,2)
+  hum = round(sen0193.value * VREF * 100,2)
   print("WaterLevel = ", str(hum))
 
   humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22,4)
