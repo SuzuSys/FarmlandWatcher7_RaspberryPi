@@ -32,7 +32,7 @@ def on_message_received(topic, payload, dup, qos, retain, **kwargs):
     response = requests.put(url, data=img)
     print(response)
     os.remove(pas)
-
+  print('finished uploading!')  
 
 def checkInternetHttplib(url, timeout=3):
   conn = http.client.HTTPConnection(url, timeout=timeout)
