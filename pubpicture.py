@@ -3,7 +3,7 @@
 from awscrt import io, mqtt
 from awsiot import mqtt_connection_builder
 from uuid import uuid4
-import json, time, os, http.client
+import json, time, os, http.client, ast
 
 PARAMSFILE = 'params.json'
 
@@ -18,7 +18,7 @@ def on_connection_resumed(connection, return_code, session_present, **kwargs):
 # MQTT Callback
 def on_message_received(topic, payload, dup, qos, retain, **kwargs):
   print("Received message from topic '{}': {}".format(topic, payload))
-  print(type(payload.decode('utf-8')))
+  print(ast.literal_eval(payload.decode('utf-8')))
 
 def checkInternetHttplib(url, timeout=3):
   conn = http.client.HTTPConnection(url, timeout=timeout)
