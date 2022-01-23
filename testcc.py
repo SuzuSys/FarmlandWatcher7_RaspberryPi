@@ -1,21 +1,15 @@
 from picamera import PiCamera
-import time
-import datetime
 from gpiozero import MCP3002, SPISoftwareFallback
-
 import Adafruit_DHT
-import csv
-import json
-import warnings
+import time, datetime, csv, json, warnings
 
 warnings.simplefilter("ignore", SPISoftwareFallback)
 VREF = 3.3
 
 def sensor(datafile):
   sen0193 = MCP3002(channel=0)
-  hum = round(sen0193.value * VREF * 100,2)
+  hum = round(sen0193.value * VREF * 100, 2)
   print("WaterLevel = ", str(hum))
-
   humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22,4)
   if humidity is not None and temperature is not None:
     humidity = round(humidity,2)
@@ -23,11 +17,9 @@ def sensor(datafile):
     print ("Temperature = ", temperature, "*C", "humidity = ", humidity, "%")
   else:
     print ('cannot connect to the sensor you stupid!!!')
-
   timeA = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=0)))
   timeC = timeA.strftime('%Y-%m-%d %H:%M:%S')
   data = [temperature, humidity, hum, timeC]
-      
   with open(datafile,"a") as output:
     writer = csv.writer(output, delimiter=",", lineterminator="\n")
     writer.writerow(data)

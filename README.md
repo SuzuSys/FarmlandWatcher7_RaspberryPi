@@ -28,6 +28,8 @@ Reference: https://github.com/aws/aws-iot-device-sdk-python-v2.git
   "datafile": "XXX.csv",
   "connect-confirm-url": "www.google.com",
   "picture-folder": "XXX",
-  "dimension": "XXX"
+  "dimension": "XXX",
+  "sensor_once_every_hour": X,
+  "camera_time": ["XX:XX", ...]
 }
 ```
