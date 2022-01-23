@@ -18,6 +18,7 @@ def on_connection_resumed(connection, return_code, session_present, **kwargs):
 # MQTT Callback
 def on_message_received(topic, payload, dup, qos, retain, **kwargs):
   print("Received message from topic '{}': {}".format(topic, payload))
+  print(type(payload))
 
 def checkInternetHttplib(url, timeout=3):
   conn = http.client.HTTPConnection(url, timeout=timeout)
