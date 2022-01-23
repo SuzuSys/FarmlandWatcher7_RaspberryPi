@@ -1,13 +1,11 @@
 from picamera import PiCamera
 import time
 import datetime
-import subprocess
 from gpiozero import MCP3002
 
 import Adafruit_DHT
 import csv
 import json
-import sys
 
 csvfile = "temp.csv"
 Vref = 3.3
@@ -40,7 +38,7 @@ def camera(dir):
   camera.start_preview()
   time.sleep(3)
   timeA = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=0)))
-  timeC = timeA.strftime('%Y-%m-%d %H')
+  timeC = timeA.strftime('%Y-%m-%d-%H')
   camera.capture(dir + "/" + "%s.jpg" % (timeC))
   camera.stop_preview()
   time.sleep(2)
