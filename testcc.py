@@ -1,14 +1,14 @@
 from picamera import PiCamera
 import time
 import datetime
-from gpiozero import MCP3002
+from gpiozero import MCP3002, SPISoftwareFallback
 
 import Adafruit_DHT
 import csv
 import json
 import warnings
 
-warnings.simplefilter("gpiozero.SPISoftwareFallback")
+warnings.simplefilter("ignore", SPISoftwareFallback)
 VREF = 3.3
 
 def sensor(datafile):
