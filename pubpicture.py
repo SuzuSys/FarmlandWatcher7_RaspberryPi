@@ -3,7 +3,7 @@
 from awscrt import io, mqtt
 from awsiot import mqtt_connection_builder
 from uuid import uuid4
-import json, time, os, http.client, ast
+import json, time, os, http.client, ast, requests
 
 PARAMSFILE = 'params.json'
 
@@ -17,8 +17,22 @@ def on_connection_resumed(connection, return_code, session_present, **kwargs):
 
 # MQTT Callback
 def on_message_received(topic, payload, dup, qos, retain, **kwargs):
-  print("Received message from topic '{}': {}".format(topic, payload))
-  print(ast.literal_eval(payload.decode('utf-8')))
+  result = ast.literal_eval(payload.decode('utf-8'))
+  print("Received message from topic '{}': validation: {}".format(topic, result['validation']))
+  if result['validation'] == 0:
+    return
+  upload_url = result['url']
+  with open(PARAMSFILE, 'r') as f:
+    params = json.load(f)
+  dir = params['picture-folder'] + '/'
+  for filename, url in upload_url.items():
+    pas = dir + filename
+    with open(pas, 'rb') as f:
+      img = f.read()
+    response = requests.put(url, data=img)
+    print(response)
+    os.remove(pas)
+
 
 def checkInternetHttplib(url, timeout=3):
   conn = http.client.HTTPConnection(url, timeout=timeout)
