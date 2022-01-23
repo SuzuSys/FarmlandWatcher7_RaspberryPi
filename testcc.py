@@ -8,7 +8,7 @@ import csv
 import json
 import warnings
 
-warnings.filters("gpiozero.SPISoftwareFallback")
+warnings.simplefilter("gpiozero.SPISoftwareFallback")
 VREF = 3.3
 
 def sensor(datafile):
