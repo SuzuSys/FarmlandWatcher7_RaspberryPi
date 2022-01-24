@@ -52,6 +52,7 @@ kill XXXX
 ```
 ## supplement - WiFi Setting
 reference: [USB Wi-Fi子機の自動再接続 - Qiita](https://qiita.com/god19/items/4616df0d92385df24475)
+
 ~/reconnect.sh
 ```
 #!/bin/sh
