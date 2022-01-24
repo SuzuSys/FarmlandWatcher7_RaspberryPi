@@ -6,7 +6,7 @@ from awsiot import mqtt_connection_builder
 from uuid import uuid4
 import json, csv, time, http.client, ast, requests, os
 
-PARAMSFILE = 'params.json'
+PARAMSFILE = './params.json'
 
 # MQTT Callback
 def on_connection_interrupted(connection, error, **kwargs):

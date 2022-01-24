@@ -5,7 +5,7 @@ import time, datetime, csv, json, schedule, warnings
 
 warnings.simplefilter("ignore", SPISoftwareFallback)
 VREF = 3.3
-PARAMSFILE = 'params.json'
+PARAMSFILE = './params.json'
 
 def sensor(datafile):
   sen0193 = MCP3002(channel=0)
