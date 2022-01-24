@@ -6,7 +6,8 @@ from awsiot import mqtt_connection_builder
 from uuid import uuid4
 import json, csv, time, http.client, ast, requests, os
 
-PARAMSFILE = './params.json'
+PREFIX_PASS = './FarmlandWatcher7_RaspberryPi/'
+PARAMSFILE = PREFIX_PASS + 'params.json'
 
 # MQTT Callback
 def on_connection_interrupted(connection, error, **kwargs):
@@ -71,6 +72,11 @@ if __name__ == '__main__':
   with open(PARAMSFILE, 'r') as f:
     params = json.load(f)
   params['client-id'] = str(uuid4())
+  params['root-ca'] = PREFIX_PASS + params['root-ca']
+  params['cert'] = PREFIX_PASS + params['cert']
+  params['key'] = PREFIX_PASS + params['key']
+  params['datafile'] = PREFIX_PASS + params['datafile']
+  params['picture-folder'] = PREFIX_PASS + params['picture-folder']
 
   print("setting connection...")
   event_loop_group = io.EventLoopGroup(1)

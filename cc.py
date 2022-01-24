@@ -5,7 +5,8 @@ import time, datetime, csv, json, schedule, warnings
 
 warnings.simplefilter("ignore", SPISoftwareFallback)
 VREF = 3.3
-PARAMSFILE = './params.json'
+PREFIX_PASS = './FarmlandWatcher7_RaspberryPi/'
+PARAMSFILE = PREFIX_PASS + 'params.json'
 
 def sensor(datafile):
   sen0193 = MCP3002(channel=0)
@@ -49,6 +50,8 @@ if __name__ == '__main__':
   print(f"loading parameters from {PARAMSFILE}")
   with open(PARAMSFILE, 'r') as f:
     params = json.load(f)
+  params['datafile'] = PREFIX_PASS + params['datafile']
+  params['picture-folder'] = PREFIX_PASS + params['picture-folder']
   print("Setting the schedule...")
   schedule.every(params["sensor_once_every_hour"]).hours.do(lambda: sensor(datafile=params["datafile"]))
   for t in params["camera_time"]:
