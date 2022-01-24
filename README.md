@@ -52,13 +52,13 @@ kill XXXX
 ```
 ## supplement - WiFi Setting
 reference: [USB Wi-Fi子機の自動再接続 - Qiita](https://qiita.com/god19/items/4616df0d92385df24475)
-
-```reconnect.sh
+~/reconnect.sh
+```
 #!/bin/sh
 ping -c 1 172.20.10.4
 test $? -eq 1 && sudo /etc/ifplugd/action.d/action_wpa wlan0 up
 ```
-
-```crontab
+crontab
+```
 * * * * * sh ~/reconnect.sh
 ```
